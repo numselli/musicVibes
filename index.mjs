@@ -15,12 +15,10 @@ const bpHost = "127.0.0.1:12345"
 
 const connector = new ButtplugNodeWebsocketClientConnector(`ws://${bpHost}`);
 const client = new ButtplugClient("Music Vibes");
-let device;
 
 async function setupButtplug() {
   await client.connect(connector);
   console.log("✅ Connected to Buttplug Server");
-  device = client.devices[0]
 }
 
 setupButtplug().catch(console.error);
@@ -91,16 +89,16 @@ function analyzeFFT(samples) {
 }
 
 async function triggerBass(level) {
-  if (!device) return;
+  if (client.devices.length==0) return;
 
   const strength = (Math.min((level/100), 1.0)*2);
 
   try {
     if (strength > threshold) {
-      await device.vibrate(strength);
+      client.devices.forEach(async device=>await device.vibrate(strength))
       console.log(`BASS TRIGGER: ${(strength*100).toFixed(2)}%`);
     } else {
-      await device.stop();
+      client.devices.forEach(async device=>await device.stop())
     }
   } catch (err) {
     console.error("Buttplug command error:", err.message);
@@ -109,7 +107,7 @@ async function triggerBass(level) {
 
 process.on("SIGINT", () => {
   ffmpeg.kill("SIGINT");
-  if (device) device.stop();
+  if (client.devices.length>0) client.devices.forEach(device=>device.stop());
   client.disconnect();
   process.exit(0);
 });
