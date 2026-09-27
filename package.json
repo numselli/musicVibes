@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "buttplug": "^5.0.1",
+    "buttplug": "^5.0.2",
     "fft-js": "^0.0.12"
   }
 }
